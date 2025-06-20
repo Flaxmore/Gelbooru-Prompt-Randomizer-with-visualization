@@ -237,12 +237,17 @@ class Gelbooru:
             status_code, response = await self._fetch(session, url)
 
         if status_code not in [200, 201]:
-            raise GelbooruException(f"""Gelbooru returned a non 200 status code: {response}""")
+            # MODIFICA: Migliorato il messaggio di errore per includere lo status code, utile per il debug.
+            raise GelbooruException(f"Gelbooru returned a non 200 status code ({status_code}): {response}")
 
         return response
 
     async def _fetch(self, session: aiohttp.ClientSession, url) -> Tuple[int, bytes]:
-        async with session.get(url) as response:
+        # MODIFICA: Aggiunto un header User-Agent per simulare un browser e prevenire blocchi (es. da Cloudflare).
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
+        }
+        async with session.get(url, headers=headers) as response:
             return response.status, await response.read()
 
 
